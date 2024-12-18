@@ -86,9 +86,9 @@ if __name__=="__main__":
     data = []
     for n in tree.find_clades(order="postorder"):
         node_elements = {}
-        node_elements["name"] = n.name.lstrip('hCoV-19/')
+        node_elements["name"] = n.name.removeprefix('hCoV-19/')
         if n.parent:
-            node_elements["parent"] = n.parent.name.lstrip('hCoV-19/')
+            node_elements["parent"] = n.parent.name.removeprefix('hCoV-19/')
         else:
             node_elements["parent"] = None
         if hasattr(n, 'node_attrs'):
@@ -98,9 +98,9 @@ if __name__=="__main__":
             if 'S1_mutations' in n.node_attrs:
                 if 'value' in n.node_attrs["S1_mutations"]:
                     node_elements["S1_mutations"] = n.node_attrs["S1_mutations"]["value"]
-        print(node_elements)
         data.append(node_elements)
 
     with open(args.output, 'w', encoding='utf-8') as handle:
+        print("name", "parent", "clade", "S1_mutations", sep='\t', file=handle)
         for elem in data:
-            print(elem['name'], elem['parent'], elem['clade_membership'], elem['S1_mutations'], sep='\t')
+            print(elem['name'], elem['parent'], elem['clade_membership'], elem['S1_mutations'], sep='\t', file=handle)

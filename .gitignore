@@ -2,7 +2,7 @@
 alignment.fasta
 metadata.tsv
 embeddings.tsv
-umap.tsv
+ordination.tsv
 
 # Errors from tests
 *.err

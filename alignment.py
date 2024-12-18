@@ -103,7 +103,7 @@ if __name__ == '__main__':
         # strip trailing stop codons
         stripped_seq = Seq(str(node_seq).rstrip('*'))
         # strip hCoV-19/ from beginning of strain name
-        strain = node.name.lstrip('hCoV-19/')
+        strain = node.name.removeprefix('hCoV-19/')
 
         sequence_records.append(SeqRecord(stripped_seq, strain, '', ''))
 
