@@ -23,10 +23,20 @@ pip install umap-learn
 
 # Commands
 
+## Provision smaller dataset
+
 Run `python alignment.py --gene S --tree https://data.nextstrain.org/ncov_gisaid_reference.json --root https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json` to produce `alignment.fasta` of spike AA sequences from https://nextstrain.org/ncov/gisaid/reference.
 
 Run `python metadata.py --tree https://data.nextstrain.org/ncov_gisaid_reference.json` to produce `metadata.tsv` from https://nextstrain.org/ncov/gisaid/reference.
 
+## Provision larger dataset
+
+Run `python alignment.py --gene S` to produce `alignment.fasta` of spike AA sequences from https://nextstrain.org/ncov/gisaid/global/all-time.
+
+Run `python metadata.py` to produce `metadata.tsv` from https://nextstrain.org/ncov/gisaid/global/all-time.
+
+## Analysis
+
 Run `python embeddings.py` to produce `embeddings.tsv` from the file `alignment.fasta`.
 
-Run `python umap-ordination.py` to produce `umap.tsv` from the file `embeddings.tsv`.
+Run `python ordination.py` to produce `ordination.tsv` from the file `embeddings.tsv`.
