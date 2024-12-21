@@ -104,7 +104,8 @@ if __name__ == '__main__':
         stripped_seq = Seq(str(node_seq).rstrip('*'))
         # strip hCoV-19/ from beginning of strain name
         strain = node.name.removeprefix('hCoV-19/')
-
-        sequence_records.append(SeqRecord(stripped_seq, strain, '', ''))
+        # only keep records without stop codons (*)
+        if not '*' in stripped_seq:
+            sequence_records.append(SeqRecord(stripped_seq, strain, '', ''))
 
     SeqIO.write(sequence_records, args.output, "fasta")
