@@ -11,14 +11,10 @@ Install PyTorch (on Mac via Homebrew, other systems will need different installa
 brew install pytorch
 ```
 
-Install ESM
-```
-pip install fair-esm
-```
+Install ESM, UMAP and various dependencies with pip:
 
-Install other various dependences
 ```
-pip install umap-learn requests
+pip install -r requirements.txt
 ```
 
 # Workflow
