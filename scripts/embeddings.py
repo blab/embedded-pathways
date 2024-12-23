@@ -8,6 +8,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Extract CLS token embeddings from AA sequences in FASTA format using ESM-2.")
     parser.add_argument("--input", type=str, default="alignment.fasta", help="Input FASTA file containing AA sequences (default: aligned.fasta).")
     parser.add_argument("--output", type=str, default="embeddings.tsv", help="Output TSV file to save CLS vectors (default: embeddings.tsv).")
+    parser.add_argument("--model", type=str, default=None, help="Fine-tuned model in .bin format. If not specified, the pre-trained ESM-2 model will be used.")
     return parser.parse_args()
 
 def load_sequences(fasta_file):
@@ -31,7 +32,7 @@ def extract_cls_embeddings(sequences, model, batch_converter, device):
         with torch.no_grad():
             results = model(batch_tokens, repr_layers=[33], return_contacts=False)
         embeddings = results["representations"][33]
-        
+
         # Extract CLS vector and move to CPU
         cls_embedding = embeddings[:, 0, :].squeeze(0).to("cpu")
 
@@ -58,8 +59,12 @@ def main():
     print(f"Using device: {device}")
 
     # Load model and tokenizer
-    print("Loading ESM-2 model...")
+    print("Loading pre-trained ESM-2 model...")
     model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
+    if args.model:
+        print(f"Updating with fine-tuned model from {args.model}...")
+        model.load_state_dict(torch.load(f"{args.model}", map_location=device))
+
     batch_converter = alphabet.get_batch_converter()
     model = model.to(device)  # Move model to device
     model.eval()  # Disable dropout for evaluation

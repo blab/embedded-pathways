@@ -1,3 +1,4 @@
 fair-esm
 requests
+transformers
 umap-learn
