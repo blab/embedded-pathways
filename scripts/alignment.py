@@ -1,4 +1,3 @@
-# !/usr/bin/env python3
 # Code from Katie Kistler
 """
 Given a tree.json and root-sequence.json file, finds the sequences of

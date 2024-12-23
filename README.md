@@ -16,27 +16,37 @@ Install ESM
 pip install fair-esm
 ```
 
-Install UMAP
+Install other various dependences
 ```
-pip install umap-learn
+pip install umap-learn requests
 ```
 
-# Commands
+# Workflow
+
+Run the entire workflow with `snakemake --cores 1 -p`
+
+# Provision data
 
 ## Provision smaller dataset
 
-Run `python alignment.py --gene S --tree https://data.nextstrain.org/ncov_gisaid_reference.json --root https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json` to produce `alignment.fasta` of spike AA sequences from https://nextstrain.org/ncov/gisaid/reference.
+In `config.yaml`, specify
+```
+tree: https://data.nextstrain.org/ncov_gisaid_reference.json
+root: https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json
+```
 
-Run `python metadata.py --tree https://data.nextstrain.org/ncov_gisaid_reference.json` to produce `metadata.tsv` from https://nextstrain.org/ncov/gisaid/reference.
+Run `snakemake --cores 1 -p data/alignment.fasta data/metadata.tsv`
 
 ## Provision larger dataset
 
-Run `python alignment.py --gene S` to produce `alignment.fasta` of spike AA sequences from https://nextstrain.org/ncov/gisaid/global/all-time.
+In `config.yaml`, specify
+```
+tree: https://data.nextstrain.org/ncov_gisaid_global_all-time.json
+root: https://data.nextstrain.org/ncov_gisaid_global_all-time_root-sequence.json
+```
 
-Run `python metadata.py` to produce `metadata.tsv` from https://nextstrain.org/ncov/gisaid/global/all-time.
+Run `snakemake --cores 1 -p data/alignment.fasta data/metadata.tsv`
 
-## Analysis
+# Compute embeddings and ordination
 
-Run `python embeddings.py` to produce `embeddings.tsv` from the file `alignment.fasta`.
-
-Run `python ordination.py` to produce `ordination.tsv` from the file `embeddings.tsv`.
+Run `snakemake --cores 1 -p results/embeddings.tsv results/ordination.tsv`

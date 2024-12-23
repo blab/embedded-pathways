@@ -1,8 +1,6 @@
 # Files created by the pipeline, which we want to keep out of git
-alignment.fasta
-metadata.tsv
-embeddings.tsv
-ordination.tsv
+data/
+results/
 
 # Errors from tests
 *.err
