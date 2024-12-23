@@ -21,7 +21,7 @@ class ProteinDataset(Dataset):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Fine-tune ESM-2 on protein sequences.")
-    parser.add_argument("--input", type=str, default="training.fasta", help="Input FASTA file containing training sequences.")
+    parser.add_argument("--input", type=str, default="alignment.fasta", help="Input FASTA file containing training sequences.")
     parser.add_argument("--output_dir", type=str, default="fine_tuned_model", help="Directory to save the fine-tuned model.")
     parser.add_argument("--epochs", type=int, default=3, help="Number of epochs for fine-tuning.")
     parser.add_argument("--batch_size", type=int, default=3, help="Batch size for training, tune this to the amount of GPU memory available")

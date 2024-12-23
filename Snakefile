@@ -34,16 +34,31 @@ rule provision_metadata:
             --output {output.metadata:q}
         """
 
+rule fine_tune:
+    input:
+        alignment = "data/alignment.fasta"
+    output:
+        model = "fine_tuned_model/pytorch_model.bin"
+    shell:
+        """
+        python scripts/fine-tune.py \
+            --input {input.alignment:q} \
+            --output-dir "fine_tuned_model"
+        """
+
 rule compute_embeddings:
     input:
         alignment = "data/alignment.fasta"
     output:
         embeddings = "results/embeddings.tsv"
+    params:
+        model = config.get("model")
     shell:
         """
         python scripts/embeddings.py \
             --input {input.alignment:q} \
-            --output {output.embeddings:q}
+            --output {output.embeddings:q} \
+            --model {params.model:q}
         """
 
 rule compute_ordination:

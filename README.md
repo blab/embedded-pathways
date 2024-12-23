@@ -45,6 +45,12 @@ root: https://data.nextstrain.org/ncov_gisaid_global_all-time_root-sequence.json
 
 Run `snakemake --cores 1 -p data/alignment.fasta data/metadata.tsv`
 
+## Fine tune model
+
+Run `snakemake --cores 1 -p fine_tuned_model/pytorch_model.bin`
+
+This requires decent GPU resources. Batch size has been tuned for a single NVIDIA L40S 46Gb node.
+
 ## Compute embeddings and ordination
 
 Run `snakemake --cores 1 -p results/embeddings.tsv results/ordination.tsv`

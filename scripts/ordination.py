@@ -31,13 +31,13 @@ def run_tsne(embeddings):
     return tsne_results
 
 def run_pca(embeddings):
-    """Run PCA to reduce embeddings to 2D."""
-    pca = PCA(n_components=2, random_state=42)
+    """Run PCA to reduce embeddings to 5D."""
+    pca = PCA(n_components=5, random_state=42)
     pca_results = pca.fit_transform(embeddings)
     return pca_results
 
 def save_results(sequence_ids, umap_results, tsne_results, pca_results, output_file):
-    """Save combined UMAP, t-SNE, and PCA 2D results to a TSV file."""
+    """Save combined UMAP, t-SNE, and PCA results to a TSV file."""
     df = pd.DataFrame({
         'id': sequence_ids,
         'umap_1': umap_results[:, 0],
@@ -45,7 +45,10 @@ def save_results(sequence_ids, umap_results, tsne_results, pca_results, output_f
         'tsne_1': tsne_results[:, 0],
         'tsne_2': tsne_results[:, 1],
         'pca_1': pca_results[:, 0],
-        'pca_2': pca_results[:, 1]
+        'pca_2': pca_results[:, 1],
+        'pca_3': pca_results[:, 2],
+        'pca_4': pca_results[:, 3],
+        'pca_5': pca_results[:, 4]             
     })
     df.to_csv(output_file, sep="\t", index=False)
     print(f"Saved results to {output_file}")

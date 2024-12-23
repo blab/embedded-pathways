@@ -1,2 +1,3 @@
 tree: https://data.nextstrain.org/ncov_gisaid_global_all-time.json
 root: https://data.nextstrain.org/ncov_gisaid_global_all-time_root-sequence.json
+model: fine_tuned_model/pytorch_model.bin
