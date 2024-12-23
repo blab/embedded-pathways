@@ -17,7 +17,7 @@ def load_sequences(fasta_file):
         sequences.append((record.id, str(record.seq)))
     return sequences
 
-def extract_cls_embeddings(sequences, model, batch_converter):
+def extract_cls_embeddings(sequences, model, batch_converter, device):
     """Extract CLS embeddings for a list of sequences."""
     all_cls_vectors = []
     for i, (seq_id, sequence) in enumerate(sequences):
@@ -25,12 +25,17 @@ def extract_cls_embeddings(sequences, model, batch_converter):
         data = [(seq_id, sequence)]
         batch_labels, batch_strs, batch_tokens = batch_converter(data)
 
+        # Move batch tokens to the specified device
+        batch_tokens = batch_tokens.to(device)
+
         with torch.no_grad():
             results = model(batch_tokens, repr_layers=[33], return_contacts=False)
         embeddings = results["representations"][33]
-        cls_embedding = embeddings[:, 0, :].squeeze(0)  # Extract CLS vector
+        
+        # Extract CLS vector and move to CPU
+        cls_embedding = embeddings[:, 0, :].squeeze(0).to("cpu")
 
-        all_cls_vectors.append((seq_id, cls_embedding.cpu().numpy()))
+        all_cls_vectors.append((seq_id, cls_embedding.numpy()))
     return all_cls_vectors
 
 def save_to_tsv(cls_vectors, output_file):
@@ -48,10 +53,15 @@ def save_to_tsv(cls_vectors, output_file):
 def main():
     args = parse_arguments()
 
+    # Check if CUDA is available and set the device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
     # Load model and tokenizer
     print("Loading ESM-2 model...")
     model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
     batch_converter = alphabet.get_batch_converter()
+    model = model.to(device)  # Move model to device
     model.eval()  # Disable dropout for evaluation
 
     # Load sequences from FASTA file
@@ -60,7 +70,7 @@ def main():
 
     # Extract CLS embeddings
     print("Extracting CLS embeddings...")
-    cls_vectors = extract_cls_embeddings(sequences, model, batch_converter)
+    cls_vectors = extract_cls_embeddings(sequences, model, batch_converter, device)
 
     # Save embeddings to TSV file
     print(f"Saving embeddings to {args.output}...")
