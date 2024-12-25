@@ -12,7 +12,7 @@ rule provision_alignment:
     params:
         tree = config.get("tree"),
         root = config.get("root"),
-        gene = "S"
+        gene = config.get("gene")
     shell:
         """
         python scripts/alignment.py \

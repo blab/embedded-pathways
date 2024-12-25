@@ -19,6 +19,11 @@ Install ESM, UMAP and various dependencies with pip:
 pip install -r requirements.txt
 ```
 
+Install Hugging Face Diffusions and Transformers
+```
+pip install diffusers["torch"] transformers
+```
+
 # Workflow
 
 Run the entire workflow with `snakemake --cores 1 -p`
