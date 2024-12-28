@@ -52,11 +52,15 @@ def main(args):
     if args.input_vae_model and os.path.exists(args.input_vae_model):
         print(f"Loading VAE model from {args.input_vae_model}")
         vae_model.load_state_dict(torch.load(args.input_vae_model, map_location=DEVICE, weights_only=False))
+    else:
+        print(f"Initializing new VAE model")
 
     diffusion_model = DiffusionModel().to(DEVICE)
     if args.input_diffusion_model and os.path.exists(args.input_diffusion_model):
         print(f"Loading Diffusion model from {args.input_diffusion_model}")
         diffusion_model.load_state_dict(torch.load(args.input_diffusion_model, map_location=DEVICE, weights_only=False))
+    else:
+        print(f"Initializing new diffusion model")
 
     scheduler = DDPMScheduler(num_train_timesteps=1000)
 

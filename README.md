@@ -64,11 +64,21 @@ Run `snakemake --cores 1 -p results/embeddings.tsv results/ordination.tsv`
 
 Working from the new [harmony nodes](https://sciwiki.fredhutch.org/scicompannounce/2024-11-17-new-harmony-gpu-nodes/) on the Fred Hutch cluster
 
-Set up
+Log into cluster
 ```
 ssh tbedford@maestro.fhcrc.org
+```
+
+Set up for ESM
+```
 module load snakemake PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
 pip install --user fair-esm nextstrain-augur transformers umap-learn
+```
+
+Set up for latent diffusion
+```
+module load snakemake PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
+pip install --user diffusers["torch"] transformers
 ```
 
 Running
