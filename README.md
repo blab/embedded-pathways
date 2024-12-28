@@ -19,7 +19,7 @@ Install ESM, UMAP and various dependencies with pip:
 pip install -r requirements.txt
 ```
 
-Install Hugging Face Diffusions and Transformers
+For latent diffusion model, install Hugging Face Diffusions and Transformers
 ```
 pip install diffusers["torch"] transformers
 ```

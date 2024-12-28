@@ -94,7 +94,6 @@ def train(vae_model, diffusion_model, scheduler, dataloader, epochs, vae_optimiz
             # Train Diffusion Model
             latent, _ = vae_model.encode(batch)
             latent = latent.view(latent.size(0), len(ALPHABET), HEIGHT, WIDTH)  # Reshape to [batch, channels, height, width]
-            # Latent shape is torch.Size([16, 5, 4, 4])
             noise = torch.randn_like(latent).to(DEVICE)
             timesteps = torch.randint(0, scheduler.config.num_train_timesteps, (latent.size(0),)).to(DEVICE)
             noisy_latent = scheduler.add_noise(latent, noise, timesteps)
@@ -108,13 +107,18 @@ def train(vae_model, diffusion_model, scheduler, dataloader, epochs, vae_optimiz
         print(f"Epoch {epoch+1}/{epochs} - VAE Loss: {vae_loss.item():.4f} - Diffusion Loss: {diffusion_loss.item():.4f}")
 
 def main(args):
-    dataset = DNADataset(args.input)
+    dataset = DNADataset(args.input_alignment)
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
     input_dim = len(ALPHABET) * len(dataset.sequences[0])
 
+    # Load or initialize VAE model
     vae_model = VAE(input_dim=input_dim, latent_dim=LATENT_DIM).to(DEVICE)
+    if args.input_vae_model and os.path.exists(args.input_vae_model):
+        print(f"Loading VAE model from {args.input_vae_model}")
+        vae_model.load_state_dict(torch.load(args.input_vae_model, map_location=DEVICE, weights_only=True))
 
+    # Load or initialize diffusion model
     diffusion_model = UNet2DModel(
         sample_size=WIDTH,                          # Width of the latent representation
         in_channels=len(ALPHABET),                  # Input channel for latent vectors
@@ -124,6 +128,9 @@ def main(args):
         down_block_types=("DownBlock2D", "AttnDownBlock2D"),
         up_block_types=("UpBlock2D", "AttnUpBlock2D")
     ).to(DEVICE)
+    if args.input_diffusion_model and os.path.exists(args.input_diffusion_model):
+        print(f"Loading Diffusion model from {args.input_diffusion_model}")
+        diffusion_model.load_state_dict(torch.load(args.input_diffusion_model, map_location=DEVICE, weights_only=True))
 
     scheduler = DDPMScheduler(num_train_timesteps=1000)
 
@@ -139,7 +146,9 @@ def main(args):
 # === Entry Point ===
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a Latent Diffusion Model on DNA sequences.")
-    parser.add_argument("--input", type=str, default="data/alignment.fasta", help="Path to the input FASTA file.")
+    parser.add_argument("--input-alignment", type=str, default="data/alignment.fasta", help="Path to the input FASTA file.")
+    parser.add_argument("--input-vae-model", type=str, default=None, help="Path to the pretrained VAE model.")
+    parser.add_argument("--input-diffusion-model", type=str, default=None, help="Path to the pretrained Diffusion model.")
     parser.add_argument("--output-vae-model", type=str, default="models/vae.pth", help="Path to save the trained VAE model.")
     parser.add_argument("--output-diffusion-model", type=str, default="models/diffusion.pth", help="Path to save the trained Diffusion model.")
 
