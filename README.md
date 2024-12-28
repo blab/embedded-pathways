@@ -88,12 +88,25 @@ sbatch --partition=chorus --gpus=1 snakemake --cores 1 -p
 
 # Interactive session
 srun --pty -c 6 -t "2-0" --gpus=1 -p chorus /bin/zsh -i
+```
+
+For ESM interactions
+```
+# Update scripts
+scp scripts/embeddings.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/embeddings.py
+scp scripts/fine-tune.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/fine-tune.py
 
 # Grab embeddings and ordination
 scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/embeddings.tsv results/embeddings.tsv
 scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/ordination.tsv results/ordination.tsv
+```
 
+For latent diffusion interactions
+```
 # Update scripts
-scp scripts/embeddings.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/embeddings.py
-scp scripts/fine-tune.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/fine-tune.py
+scp latent-diffusion/train.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/train.py
+scp latent-diffusion/generate.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/generate.py
+
+# Grab generated sequences
+scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/generated.fasta results/generated.fasta
 ```

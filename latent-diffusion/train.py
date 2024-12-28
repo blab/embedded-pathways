@@ -8,7 +8,7 @@ from diffusers import DDPMScheduler
 import torch.nn as nn
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 EPOCHS = 10
 
 def train(vae_model, diffusion_model, scheduler, dataloader, epochs, vae_optimizer, diffusion_optimizer):
@@ -45,7 +45,7 @@ def train(vae_model, diffusion_model, scheduler, dataloader, epochs, vae_optimiz
 
 def main(args):
     dataset = DNADataset(args.input_alignment)
-    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, pin_memory=True)
 
     input_dim = len(ALPHABET) * SEQ_LENGTH
     vae_model = VAE(input_dim=input_dim, latent_dim=LATENT_DIM).to(DEVICE)
@@ -82,4 +82,7 @@ if __name__ == "__main__":
     parser.add_argument("--output-diffusion-model", type=str, default="models/diffusion.pth", help="Path to save the trained Diffusion model.")
 
     args = parser.parse_args()
+
+    print(f"Using device: {DEVICE}")
+    
     main(args)
