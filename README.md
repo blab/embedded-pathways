@@ -104,9 +104,20 @@ scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/ordination.tsv result
 For latent diffusion interactions
 ```
 # Update scripts
+scp latent-diffusion/models.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/models.py
 scp latent-diffusion/train.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/train.py
 scp latent-diffusion/generate.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/generate.py
 
 # Grab generated sequences
 scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/generated.fasta results/generated.fasta
 ```
+
+# Models
+
+## Variational autoencoder
+
+VAE model is 154M parameters
+
+## Diffusion model
+
+Using U-Net. Diffusion model is 15M parameters

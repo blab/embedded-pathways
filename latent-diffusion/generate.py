@@ -53,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument("--input-diffusion-model", type=str, default="models/diffusion.pth", help="Path to the trained Diffusion model")
     parser.add_argument("--output-alignment", type=str, default="results/generated.fasta", help="FASTA file to output sequences to")
     parser.add_argument("--count", type=int, default=10, help="Number of DNA sequences to generate")
-    parser.add_argument("--batch-size", type=int, default=32, help="Batch size for generation")
+    parser.add_argument("--batch-size", type=int, default=4, help="Batch size for generation")
     args = parser.parse_args()
 
     print(f"Using device: {DEVICE}")
@@ -62,6 +62,7 @@ if __name__ == "__main__":
 
     if not os.path.exists("results/"):
         os.makedirs("results/")
+
     with open(args.output_alignment, 'w') as f:
         for i, seq in enumerate(sequences):
             print(f">seq_{i + 1}", file=f)

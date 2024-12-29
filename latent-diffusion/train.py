@@ -55,12 +55,18 @@ def main(args):
     else:
         print(f"Initializing new VAE model")
 
+    vae_params = sum(p.numel() for p in vae_model.parameters() if p.requires_grad)
+    print(f"VAE parameters: {vae_params}")
+
     diffusion_model = DiffusionModel().to(DEVICE)
     if args.input_diffusion_model and os.path.exists(args.input_diffusion_model):
         print(f"Loading Diffusion model from {args.input_diffusion_model}")
         diffusion_model.load_state_dict(torch.load(args.input_diffusion_model, map_location=DEVICE, weights_only=False))
     else:
         print(f"Initializing new diffusion model")
+
+    diffusion_params = sum(p.numel() for p in diffusion_model.parameters() if p.requires_grad)
+    print(f"Diffusion model parameters: {diffusion_params}")
 
     scheduler = DDPMScheduler(num_train_timesteps=1000)
 
@@ -84,5 +90,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print(f"Using device: {DEVICE}")
-    
+
     main(args)

@@ -5,23 +5,24 @@ from Bio import SeqIO
 from diffusers import UNet2DModel
 
 # Constants
-LATENT_DIM = 80     # Dimensionality of latent space len(ALPHABET) * HEIGHT * WIDTH = 5 * 4 * 4 = 80
-HEIGHT = 4          # Height of the latent tensor
-WIDTH = 4           # Width of the latent tensor
+LATENT_DIM = 320    # Dimensionality of latent space len(ALPHABET) * HEIGHT * WIDTH = 5 * 8 * 8 = 320
+HEIGHT = 8          # Height of the latent tensor
+WIDTH = 8           # Width of the latent tensor
 ALPHABET = "ATGC-"  # DNA alphabet, with "-" as gap/unknown character
 SEQ_LENGTH = 29903  # Length of DNA sequence to generate
 
 class DNADataset(torch.utils.data.Dataset):
     def __init__(self, fasta_file):
-        self.sequences = [str(record.seq) for record in SeqIO.parse(fasta_file, "fasta")]
+        self.records = list(SeqIO.parse(fasta_file, "fasta"))
 
     def __len__(self):
-        return len(self.sequences)
+        return len(self.records)
 
     def __getitem__(self, idx):
-        sequence = self.sequences[idx]
+        record = self.records[idx]
+        sequence = str(record.seq)
         encoded = self.one_hot_encode(sequence)
-        return torch.tensor(encoded, dtype=torch.float32)
+        return torch.tensor(encoded, dtype=torch.float32), record.id
 
     @staticmethod
     def one_hot_encode(sequence):
@@ -76,7 +77,7 @@ class DiffusionModel(nn.Module):
             in_channels=len(ALPHABET),                  # Input channel for latent vectors
             out_channels=len(ALPHABET),                 # Output channel
             layers_per_block=2,                         # Number of layers per block
-            block_out_channels=(64, 128),               # Match the number of down_block_types
+            block_out_channels=(128, 256),              # Match the number of down_block_types
             down_block_types=("DownBlock2D", "AttnDownBlock2D"),
             up_block_types=("UpBlock2D", "AttnUpBlock2D")
         )
