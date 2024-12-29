@@ -107,9 +107,13 @@ For latent diffusion interactions
 scp latent-diffusion/models.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/models.py
 scp latent-diffusion/train.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/train.py
 scp latent-diffusion/generate.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/generate.py
+scp latent-diffusion/embed.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/embed.py
 
 # Grab generated sequences
 scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/generated.fasta results/generated.fasta
+
+# Grab embeddings
+scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/embeddings.tsv results/embeddings.tsv
 ```
 
 # Models
