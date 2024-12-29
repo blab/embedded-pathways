@@ -16,7 +16,8 @@ def train(vae_model, diffusion_model, scheduler, dataloader, epochs, vae_optimiz
     for epoch in range(epochs):
         vae_model.train()
         diffusion_model.train()
-        for batch in dataloader:
+        for record_set in dataloader:
+            batch, _ = record_set  # Unpack sequence tensor and record_id
             batch = batch.view(batch.size(0), -1).to(DEVICE)  # Flatten one-hot sequences
 
             # Train VAE

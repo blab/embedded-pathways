@@ -2,9 +2,8 @@ configfile: "defaults/config.yaml"
 
 rule all:
     input:
-        results = expand(
-            "results/ordination.tsv"
-        )
+        generated = "results/generated.fasta",
+        ordination = "results/ordination.tsv"
 
 rule provision_alignment:
     output:
@@ -34,31 +33,46 @@ rule provision_metadata:
             --output {output.metadata:q}
         """
 
-rule fine_tune:
+rule train:
     input:
         alignment = "data/alignment.fasta"
     output:
-        model = "fine_tuned_model/pytorch_model.bin"
+        vae_model = "models/vae.pth",
+        diffusion_model = "models/diffusion.pth"
     shell:
         """
-        python scripts/fine-tune.py \
-            --input {input.alignment:q} \
-            --output-dir "fine_tuned_model"
+        python latent-diffusion/train.py \
+            --input-alignment {input.alignment:q} \
+            --output-vae-model {output.vae_model:q} \
+            --output-diffusion-model {output.diffusion_model:q}
         """
 
-rule compute_embeddings:
+rule generate:
     input:
-        alignment = "data/alignment.fasta"
+        vae_model = "models/vae.pth",
+        diffusion_model = "models/diffusion.pth"
     output:
-        embeddings = "results/embeddings.tsv"
-    params:
-        model = config.get("model")
+        alignment = "results/generated.fasta"
     shell:
         """
-        python scripts/embeddings.py \
-            --input {input.alignment:q} \
-            --output {output.embeddings:q} \
-            --model {params.model:q}
+        python latent-diffusion/generate.py \
+            --input-vae-model {input.vae_model:q} \
+            --input-diffusion-model {input.diffusion_model:q} \
+            --output-alignment {output.alignment:q} \
+        """
+
+rule embed:
+    input:
+        alignment = "data/alignment.fasta",
+        vae_model = "models/vae.pth"
+    output:
+        embeddings = "results/embeddings.tsv"
+    shell:
+        """
+        python latent-diffusion/embed.py \
+            --input-alignment {input.alignment:q} \
+            --input-vae-model {input.vae_model:q} \
+            --output-embeddings {output.embeddings:q} \
         """
 
 rule compute_ordination:

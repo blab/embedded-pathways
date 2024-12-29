@@ -1,8 +1,12 @@
 # Embedded Pathways
 
-Analyzing evolution through embedding space in protein language models. Here I'm
-using ESM-2 as it was trained on viral proteins and should include SARS-CoV-2
-spike.
+Analyzing evolution as pathways through latent representation space. This
+repository analyzes SARS-CoV-2 spike protein or SARS-CoV-2 full genome sequence.
+The former uses the ESM-2 protein language model that was trained on a large
+corpus of protein sequences including viral proteins. There is optional fine
+tuning of ESM-2 with SARS-CoV-2 spike sequences. The latter uses a custom latent
+diffusion model implemented with PyTorch / Hugging Face. This is analogous to
+the Stable Diffusion strategy.
 
 # Installation
 
@@ -13,52 +17,47 @@ Install PyTorch (on Mac via Homebrew, other systems will need different installa
 brew install pytorch
 ```
 
-Install ESM, UMAP and various dependencies with pip:
+Install ESM, Hugging Face and various dependencies with pip:
 
 ```
 pip install -r requirements.txt
 ```
 
-For latent diffusion model, install Hugging Face Diffusions and Transformers
-```
-pip install diffusers["torch"] transformers
-```
+# ESM workflow
 
-# Workflow
-
-Run the entire workflow with `snakemake --cores 1 -p`
+Run the entire workflow with `snakemake --cores 1 -p --snakefile ESM.smk`
 
 ## Provision data
 
-### Provision smaller dataset
-
-In `config.yaml`, specify
-```
-tree: https://data.nextstrain.org/ncov_gisaid_reference.json
-root: https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json
-```
-
-Run `snakemake --cores 1 -p data/alignment.fasta data/metadata.tsv`
-
-### Provision larger dataset
-
-In `config.yaml`, specify
-```
-tree: https://data.nextstrain.org/ncov_gisaid_global_all-time.json
-root: https://data.nextstrain.org/ncov_gisaid_global_all-time_root-sequence.json
-```
-
-Run `snakemake --cores 1 -p data/alignment.fasta data/metadata.tsv`
+Run `snakemake --cores 1 -p --snakefile ESM.smk data/alignment.fasta data/metadata.tsv`
 
 ## Fine tune model
 
-Run `snakemake --cores 1 -p fine_tuned_model/pytorch_model.bin`
+Run `snakemake --cores 1 -p --snakefile ESM.smk models/pytorch_model.bin`
 
 This requires decent GPU resources. Batch size has been tuned for a single NVIDIA L40S 46Gb node.
 
 ## Compute embeddings and ordination
 
-Run `snakemake --cores 1 -p results/embeddings.tsv results/ordination.tsv`
+Run `snakemake --cores 1 -p --snakefile ESM.smk results/embeddings.tsv results/ordination.tsv`
+
+# Latent diffusion workflow
+
+## Provision data
+
+Run `snakemake --cores 1 -p --snakefile latent_diffusion.smk data/alignment.fasta data/metadata.tsv`
+
+## Train latent diffusion model
+
+Run `snakemake --cores 1 -p --snakefile latent_diffusion.smk models/vae.pth models/diffusion.pth`
+
+## Generate sequences from latent diffusion model
+
+Run `snakemake --cores 1 -p --snakefile latent_diffusion.smk results/generated.fasta`
+
+## Compute embeddings and ordination
+
+Run `snakemake --cores 1 -p --snakefile latent_diffusion.smk results/embeddings.tsv results/ordination.tsv`
 
 # Cluster
 
@@ -72,13 +71,13 @@ ssh tbedford@maestro.fhcrc.org
 Set up for ESM
 ```
 module load snakemake PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
-pip install --user fair-esm nextstrain-augur transformers umap-learn
+pip install --user fair-esm nextstrain-augur transformers
 ```
 
 Set up for latent diffusion
 ```
 module load snakemake PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
-pip install --user diffusers["torch"] transformers
+pip install --user nextstrain-augur diffusers["torch"] transformers
 ```
 
 Running
@@ -95,10 +94,6 @@ For ESM interactions
 # Update scripts
 scp scripts/embeddings.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/embeddings.py
 scp scripts/fine-tune.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/fine-tune.py
-
-# Grab embeddings and ordination
-scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/embeddings.tsv results/embeddings.tsv
-scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/ordination.tsv results/ordination.tsv
 ```
 
 For latent diffusion interactions
@@ -108,12 +103,11 @@ scp latent-diffusion/models.py tbedford@maestro.fhcrc.org:~/embedded-pathways/la
 scp latent-diffusion/train.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/train.py
 scp latent-diffusion/generate.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/generate.py
 scp latent-diffusion/embed.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/embed.py
+```
 
-# Grab generated sequences
-scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/generated.fasta results/generated.fasta
-
-# Grab embeddings
-scp tbedford@maestro.fhcrc.org:~/embedded-pathways/results/embeddings.tsv results/embeddings.tsv
+Grab remote results
+```
+scp -r tbedford@maestro.fhcrc.org:~/embedded-pathways/results/ results/
 ```
 
 # Models

@@ -1,5 +1,6 @@
 diffusers
 fair-esm
+nextstrain-augur
 requests
+scikit-learn
 transformers
-umap-learn

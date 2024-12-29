@@ -1,7 +1,6 @@
 import argparse
 import pandas as pd
 import numpy as np
-import umap
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
@@ -18,12 +17,6 @@ def load_embeddings(input_file):
     embeddings = df.iloc[:, 1:].values  # Remaining columns contain embeddings
     return sequence_ids, embeddings
 
-def run_umap(embeddings):
-    """Run UMAP to reduce embeddings to 2D."""
-    reducer = umap.UMAP(n_components=2, random_state=42)
-    umap_results = reducer.fit_transform(embeddings)
-    return umap_results
-
 def run_tsne(embeddings):
     """Run t-SNE to reduce embeddings to 2D."""
     tsne = TSNE(n_components=2, random_state=42, init="random")
@@ -36,19 +29,17 @@ def run_pca(embeddings):
     pca_results = pca.fit_transform(embeddings)
     return pca_results
 
-def save_results(sequence_ids, umap_results, tsne_results, pca_results, output_file):
-    """Save combined UMAP, t-SNE, and PCA results to a TSV file."""
+def save_results(sequence_ids, tsne_results, pca_results, output_file):
+    """Save combined t-SNE, and PCA results to a TSV file."""
     df = pd.DataFrame({
         'id': sequence_ids,
-        'umap_1': umap_results[:, 0],
-        'umap_2': umap_results[:, 1],
         'tsne_1': tsne_results[:, 0],
         'tsne_2': tsne_results[:, 1],
         'pca_1': pca_results[:, 0],
         'pca_2': pca_results[:, 1],
         'pca_3': pca_results[:, 2],
         'pca_4': pca_results[:, 3],
-        'pca_5': pca_results[:, 4]             
+        'pca_5': pca_results[:, 4]
     })
     df.to_csv(output_file, sep="\t", index=False)
     print(f"Saved results to {output_file}")
@@ -60,10 +51,6 @@ def main():
     print(f"Loading embeddings from {args.input}...")
     sequence_ids, embeddings = load_embeddings(args.input)
 
-    # Run UMAP
-    print("Running UMAP for dimensionality reduction...")
-    umap_results = run_umap(embeddings)
-
     # Run t-SNE
     print("Running t-SNE for dimensionality reduction...")
     tsne_results = run_tsne(embeddings)
@@ -74,7 +61,7 @@ def main():
 
     # Save results
     print(f"Saving combined results to {args.output}...")
-    save_results(sequence_ids, umap_results, tsne_results, pca_results, args.output)
+    save_results(sequence_ids, tsne_results, pca_results, args.output)
 
 if __name__ == "__main__":
     main()
