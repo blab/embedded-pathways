@@ -7,7 +7,7 @@ from models import VAE, DNADataset, ALPHABET, SEQ_LENGTH, LATENT_DIM
 import torch.nn as nn
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 EPOCHS = 10
 
 def train_vae(vae_model, dataloader, epochs, optimizer):

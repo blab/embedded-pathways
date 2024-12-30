@@ -33,40 +33,64 @@ rule provision_metadata:
             --output {output.metadata:q}
         """
 
-rule train:
+rule trim:
     input:
         alignment = "data/alignment.fasta"
     output:
-        vae_model = "models/vae.pth",
-        diffusion_model = "models/diffusion.pth"
+        alignment = "data/trimmed.fasta"
     shell:
         """
-        python latent-diffusion/train.py \
+        python scripts/trim.py \
             --input-alignment {input.alignment:q} \
-            --output-vae-model {output.vae_model:q} \
-            --output-diffusion-model {output.diffusion_model:q}
+            --output-alignment {output.alignment:q}
         """
 
-rule generate:
+rule train_vae:
     input:
-        vae_model = "models/vae.pth",
-        diffusion_model = "models/diffusion.pth"
+        alignment = "data/trimmed.fasta"
     output:
-        alignment = "results/generated.fasta"
-    params:
-        sequence_count = config.get("count")
+        vae_model = "models/vae.pth"
     shell:
         """
-        python latent-diffusion/generate.py \
-            --input-vae-model {input.vae_model:q} \
-            --input-diffusion-model {input.diffusion_model:q} \
-            --output-alignment {output.alignment:q} \
-            --count {params.sequence_count:q}
+        python latent-diffusion/train_vae.py \
+            --input-alignment {input.alignment:q} \
+            --output-vae-model {output.vae_model:q}
         """
+
+# rule train:
+#     input:
+#         alignment = "data/alignment.fasta"
+#     output:
+#         vae_model = "models/vae.pth",
+#         diffusion_model = "models/diffusion.pth"
+#     shell:
+#         """
+#         python latent-diffusion/train.py \
+#             --input-alignment {input.alignment:q} \
+#             --output-vae-model {output.vae_model:q} \
+#             --output-diffusion-model {output.diffusion_model:q}
+#         """
+
+# rule generate:
+#     input:
+#         vae_model = "models/vae.pth",
+#         diffusion_model = "models/diffusion.pth"
+#     output:
+#         alignment = "results/generated.fasta"
+#     params:
+#         sequence_count = config.get("count")
+#     shell:
+#         """
+#         python latent-diffusion/generate.py \
+#             --input-vae-model {input.vae_model:q} \
+#             --input-diffusion-model {input.diffusion_model:q} \
+#             --output-alignment {output.alignment:q} \
+#             --count {params.sequence_count:q}
+#         """
 
 rule embed:
     input:
-        alignment = "data/alignment.fasta",
+        alignment = "data/trimmed.fasta",
         vae_model = "models/vae.pth"
     output:
         embeddings = "results/embeddings.tsv"

@@ -9,7 +9,7 @@ LATENT_DIM = 80    # Dimensionality of latent space len(ALPHABET) * HEIGHT * WID
 HEIGHT = 4          # Height of the latent tensor
 WIDTH = 4           # Width of the latent tensor
 ALPHABET = "ATGC-"  # DNA alphabet, with "-" as gap/unknown character
-SEQ_LENGTH = 29903  # Length of DNA sequence to generate
+SEQ_LENGTH = 3822   # Length of DNA sequence to generate (for spike gene)
 
 class DNADataset(torch.utils.data.Dataset):
     def __init__(self, fasta_file):

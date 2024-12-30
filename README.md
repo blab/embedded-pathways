@@ -57,7 +57,7 @@ Run `snakemake --cores 1 -p --snakefile latent_diffusion.smk results/generated.f
 
 ## Compute embeddings and ordination
 
-Run `snakemake --cores 1 -p --snakefile latent_diffusion.smk results/embeddings.tsv results/ordination.tsv`
+Run `snakemake --cores 1 -p --snakefile latent_diffusion.smk results/ordination.tsv`
 
 # Cluster
 
