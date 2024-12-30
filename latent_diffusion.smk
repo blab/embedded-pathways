@@ -53,12 +53,15 @@ rule generate:
         diffusion_model = "models/diffusion.pth"
     output:
         alignment = "results/generated.fasta"
+    params:
+        sequence_count = config.get("count")
     shell:
         """
         python latent-diffusion/generate.py \
             --input-vae-model {input.vae_model:q} \
             --input-diffusion-model {input.diffusion_model:q} \
             --output-alignment {output.alignment:q} \
+            --count {params.sequence_count:q}
         """
 
 rule embed:

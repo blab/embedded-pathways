@@ -1,3 +1,4 @@
 tree: https://data.nextstrain.org/ncov_gisaid_global_all-time.json
 root: https://data.nextstrain.org/ncov_gisaid_global_all-time_root-sequence.json
 gene: nuc
+count: 50

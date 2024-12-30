@@ -24,7 +24,8 @@ def train(vae_model, diffusion_model, scheduler, dataloader, epochs, vae_optimiz
             recon, mean, logvar = vae_model(batch)
             recon_loss = mse_loss(recon, batch)
             kl_loss = -0.5 * torch.sum(1 + logvar - mean.pow(2) - logvar.exp())
-            vae_loss = recon_loss + kl_loss
+            beta = 0.1  # tunable parameter
+            vae_loss = recon_loss + beta * kl_loss
             vae_optimizer.zero_grad()
             vae_loss.backward()
             vae_optimizer.step()

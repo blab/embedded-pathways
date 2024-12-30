@@ -83,31 +83,25 @@ pip install --user nextstrain-augur diffusers["torch"] transformers
 Running
 ```
 # Submit worklow
-sbatch --partition=chorus --gpus=1 snakemake --cores 1 -p
+sbatch --partition=chorus --gpus=1 snakemake --cores 1 -p --snakefile latent_diffusion.smk
 
 # Interactive session
 srun --pty -c 6 -t "2-0" --gpus=1 -p chorus /bin/zsh -i
 ```
 
-For ESM interactions
+Update ESM scripts
 ```
-# Update scripts
-scp scripts/embeddings.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/embeddings.py
-scp scripts/fine-tune.py tbedford@maestro.fhcrc.org:~/embedded-pathways/scripts/fine-tune.py
+scp ESM/* tbedford@maestro.fhcrc.org:~/embedded-pathways/ESM/
 ```
 
-For latent diffusion interactions
+Update latent diffusion scripts
 ```
-# Update scripts
-scp latent-diffusion/models.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/models.py
-scp latent-diffusion/train.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/train.py
-scp latent-diffusion/generate.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/generate.py
-scp latent-diffusion/embed.py tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/embed.py
+scp latent-diffusion/* tbedford@maestro.fhcrc.org:~/embedded-pathways/latent-diffusion/
 ```
 
 Grab remote results
 ```
-scp -r tbedford@maestro.fhcrc.org:~/embedded-pathways/results/ results/
+scp -r tbedford@maestro.fhcrc.org:~/embedded-pathways/results/* results/
 ```
 
 # Models
