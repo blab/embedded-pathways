@@ -15,6 +15,8 @@ def train_vae(vae_model, dataloader, epochs, optimizer):
     for epoch in range(epochs):
         vae_model.train()
         epoch_loss = 0.0
+        epoch_recon_loss = 0.0
+        epoch_kl_loss = 0.0
         for record_set in dataloader:
             batch, _ = record_set  # Unpack sequence tensor and record_id
             batch = batch.view(batch.size(0), -1).to(DEVICE)  # Flatten one-hot sequences
@@ -31,8 +33,10 @@ def train_vae(vae_model, dataloader, epochs, optimizer):
             optimizer.step()
 
             epoch_loss += vae_loss.item()
+            epoch_recon_loss += recon_loss.item()
+            epoch_kl_loss += kl_loss.item()
 
-        print(f"Epoch {epoch+1}/{epochs} - VAE Loss: {epoch_loss / len(dataloader):.4f}")
+        print(f"Epoch {epoch+1}/{epochs} - VAE Loss: {epoch_loss / len(dataloader):.4f} - Reconstruction Loss: {epoch_recon_loss / len(dataloader):.4f} - KL Loss: {epoch_kl_loss / len(dataloader):.4f}")
 
 def main(args):
     dataset = DNADataset(args.input_alignment)
