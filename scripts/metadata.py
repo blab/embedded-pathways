@@ -1,3 +1,5 @@
+# code from Trevor Bedford and Katie Kistler
+# MIT license
 import os, sys
 import json
 import requests

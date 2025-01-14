@@ -1,3 +1,4 @@
+# code from ChatGPT
 import argparse
 from Bio import SeqIO
 

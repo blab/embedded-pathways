@@ -1,4 +1,5 @@
 # Code from Katie Kistler
+# MIT license
 """
 Given a tree.json and root-sequence.json file, finds the sequences of
 each node in the tree and outputs a FASTA file with these node sequences.
