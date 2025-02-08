@@ -1,4 +1,11 @@
-tree: https://data.nextstrain.org/ncov_gisaid_global_all-time.json
-root: https://data.nextstrain.org/ncov_gisaid_global_all-time_root-sequence.json
-gene: nuc
-count: 50
+ESM:
+  tree: https://data.nextstrain.org/ncov_gisaid_reference.json
+  root: https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json
+  gene: S
+  fine_tune: false
+
+latent_diffusion:
+  tree: https://data.nextstrain.org/ncov_gisaid_reference.json
+  root: https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json
+  gene: nuc
+  count: 50

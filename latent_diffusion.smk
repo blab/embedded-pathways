@@ -9,9 +9,9 @@ rule provision_alignment:
     output:
         alignment = "data/alignment.fasta"
     params:
-        tree = config.get("tree"),
-        root = config.get("root"),
-        gene = config.get("gene")
+        tree = config["latent_diffusion"]["tree"],
+        root = config["latent_diffusion"]["root"],
+        gene = config["latent_diffusion"]["gene"]
     shell:
         """
         python scripts/alignment.py \
@@ -25,7 +25,7 @@ rule provision_metadata:
     output:
         metadata = "data/metadata.tsv"
     params:
-        tree = config.get("tree")
+        tree = config["latent_diffusion"]["tree"]
     shell:
         """
         python scripts/metadata.py \
@@ -78,7 +78,7 @@ rule train_vae:
 #     output:
 #         alignment = "results/generated.fasta"
 #     params:
-#         sequence_count = config.get("count")
+#         sequence_count = config["latent_diffusion"]["count"]
 #     shell:
 #         """
 #         python latent-diffusion/generate.py \

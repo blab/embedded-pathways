@@ -8,9 +8,9 @@ rule provision_alignment:
     output:
         alignment = "data/alignment.fasta"
     params:
-        tree = config.get("tree"),
-        root = config.get("root"),
-        gene = config.get("gene")
+        tree = config["ESM"]["tree"],
+        root = config["ESM"]["root"],
+        gene = config["ESM"]["gene"]
     shell:
         """
         python scripts/alignment.py \
@@ -24,7 +24,7 @@ rule provision_metadata:
     output:
         metadata = "data/metadata.tsv"
     params:
-        tree = config.get("tree")
+        tree = config["ESM"]["tree"]
     shell:
         """
         python scripts/metadata.py \
@@ -47,15 +47,17 @@ rule fine_tune:
 rule compute_embeddings:
     input:
         alignment = "data/alignment.fasta",
-        model = "models/pytorch_model.bin"
+        model = "models/pytorch_model.bin" if config["ESM"]["fine_tune"] else []
     output:
         embeddings = "results/embeddings.tsv"
+    params:
+        model_param = "--model models/pytorch_model.bin" if config["ESM"]["fine_tune"] else ""
     shell:
         """
         python ESM/embeddings.py \
             --input {input.alignment:q} \
             --output {output.embeddings:q} \
-            --model {input.model:q}
+            {input.model:q}
         """
 
 rule compute_ordination:
