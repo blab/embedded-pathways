@@ -49,6 +49,7 @@ rule compute_embeddings:
         alignment = "data/alignment.fasta",
         model = "models/pytorch_model.bin" if config["ESM"]["fine_tune"] else []
     output:
+        log_likelihoods = "results/log_likelihoods.tsv",
         embeddings = "results/embeddings.tsv"
     params:
         model_param = "--model models/pytorch_model.bin" if config["ESM"]["fine_tune"] else ""
@@ -56,7 +57,8 @@ rule compute_embeddings:
         """
         python ESM/embeddings.py \
             --input {input.alignment:q} \
-            --output {output.embeddings:q} \
+            --output-log-likelihoods {output.log_likelihoods:q} \
+            --output-embeddings {output.embeddings:q} \
             {input.model:q}
         """
 

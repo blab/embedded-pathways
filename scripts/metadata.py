@@ -86,6 +86,9 @@ if __name__=="__main__":
         tree = json_to_tree(tree_json)
 
     data = []
+    include_clade = False
+    include_mutations = False
+
     for n in tree.find_clades(order="postorder"):
         node_elements = {}
         node_elements["name"] = n.name.removeprefix('hCoV-19/')
@@ -94,15 +97,23 @@ if __name__=="__main__":
         else:
             node_elements["parent"] = None
         if hasattr(n, 'node_attrs'):
-            if 'clade_membership' in n.node_attrs:
-                if 'value' in n.node_attrs["clade_membership"]:
-                    node_elements["clade_membership"] = n.node_attrs["clade_membership"]["value"]
-            if 'S1_mutations' in n.node_attrs:
-                if 'value' in n.node_attrs["S1_mutations"]:
-                    node_elements["S1_mutations"] = n.node_attrs["S1_mutations"]["value"]
+            if 'clade_membership' in n.node_attrs and 'value' in n.node_attrs["clade_membership"]:
+                node_elements["clade_membership"] = n.node_attrs["clade_membership"]["value"]
+                include_clade = True
+            if 'S1_mutations' in n.node_attrs and 'value' in n.node_attrs["S1_mutations"]:
+                node_elements["S1_mutations"] = n.node_attrs["S1_mutations"]["value"]
+                include_mutations = True
         data.append(node_elements)
 
+    # Determine column headers dynamically
+    headers = ["name", "parent"]
+    if include_clade:
+        headers.append("clade_membership")
+    if include_mutations:
+        headers.append("S1_mutations")
+
     with open(args.output, 'w', encoding='utf-8') as handle:
-        print("name", "parent", "clade", "S1_mutations", sep='\t', file=handle)
+        print(*headers, sep='\t', file=handle)
         for elem in data:
-            print(elem['name'], elem['parent'], elem['clade_membership'], elem['S1_mutations'], sep='\t', file=handle)
+            row = [elem.get(header, "") for header in headers]
+            print(*row, sep='\t', file=handle)

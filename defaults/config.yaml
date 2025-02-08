@@ -1,6 +1,6 @@
 ESM:
-  tree: https://data.nextstrain.org/ncov_gisaid_reference.json
-  root: https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json
+  tree: https://data.nextstrain.org/nextclade_sars-cov-2.json
+  root: https://data.nextstrain.org/nextclade_sars-cov-2_root-sequence.json
   gene: S
   fine_tune: false
 
