@@ -59,7 +59,7 @@ rule compute_embeddings:
             --input {input.alignment:q} \
             --output-log-likelihoods {output.log_likelihoods:q} \
             --output-embeddings {output.embeddings:q} \
-            {input.model:q}
+            {params.model_param}
         """
 
 rule compute_ordination:
