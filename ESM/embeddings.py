@@ -72,6 +72,12 @@ def main():
 
     # Load model and tokenizer
     print("Loading pre-trained ESM-2 model...")
+    # For the 650M parameter model: esm.pretrained.esm2_t33_650M_UR50D()
+    #     with an embedding dimenion of 1280
+    # For the 3B parameter model: esm2_t36_3B_UR50D
+    #     with an embedding dimenion of 2560
+    # For the 15B parameter model: esm2_t48_15B_UR50D
+    #     with an embedding dimenion of 6144
     model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
     if args.model:
         print(f"Updating with fine-tuned model from {args.model}...")
