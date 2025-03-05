@@ -9,7 +9,7 @@ rule download_auspice_json:
         tree = "data/auspice.json",
         root = "data/auspice_root-sequence.json"
     params:
-        dataset = config["ESM"]["dataset"]
+        dataset = config["ESM_embeddings"]["dataset"]
     shell:
         """
         nextstrain remote download {params.dataset:q} {output.tree:q}
@@ -22,7 +22,7 @@ rule provision_alignment:
     output:
         alignment = "data/alignment.fasta"
     params:
-        gene = config["ESM"]["gene"]
+        gene = config["ESM_embeddings"]["gene"]
     shell:
         """
         python scripts/alignment.py \
@@ -44,41 +44,28 @@ rule provision_metadata:
             --output {output.metadata:q}
         """
 
-rule fine_tune:
-    input:
-        alignment = "data/alignment.fasta"
-    output:
-        model = "models/pytorch_model.bin"
-    shell:
-        """
-        python ESM/fine-tune.py \
-            --input {input.alignment:q} \
-            --output-dir "models"
-        """
-
 rule compute_embeddings:
     input:
         alignment = "data/alignment.fasta",
-        model = "models/pytorch_model.bin" if config["ESM"]["fine_tune"] else []
     output:
-        log_likelihoods = "results/log_likelihoods.tsv",
-        embeddings = "results/embeddings.tsv"
+        log_likelihoods = config["ESM_embeddings"]["log_likelihoods"],
+        embeddings = config["ESM_embeddings"]["embeddings"]
     params:
-        model_param = "--model models/pytorch_model.bin" if config["ESM"]["fine_tune"] else ""
+        model = config["ESM_embeddings"]["model"]
     shell:
         """
         python ESM/embeddings.py \
             --input {input.alignment:q} \
             --output-log-likelihoods {output.log_likelihoods:q} \
             --output-embeddings {output.embeddings:q} \
-            {params.model_param}
+            --model {params.model:q}
         """
 
 rule compute_ordination:
     input:
-        embeddings = "results/embeddings.tsv"
+        embeddings = config["ESM_embeddings"]["embeddings"]
     output:
-        ordination = "results/ordination.tsv"
+        ordination = config["ESM_embeddings"]["ordination"]
     shell:
         """
         python scripts/ordination.py \

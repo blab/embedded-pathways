@@ -10,7 +10,7 @@ def parse_arguments():
     parser.add_argument("--input", type=str, default="alignment.fasta", help="Input FASTA file containing AA sequences (default: aligned.fasta).")
     parser.add_argument("--output-log-likelihoods", type=str, default="log_likelihoods.tsv", help="Output TSV file to save log likelihoods (default: log_likelihoods.tsv).")
     parser.add_argument("--output-embeddings", type=str, default="embeddings.tsv", help="Output TSV file to save CLS vectors (default: embeddings.tsv).")
-    parser.add_argument("--model", type=str, default=None, help="Fine-tuned model in .bin format. If not specified, the pre-trained ESM-2 model will be used.")
+    parser.add_argument("--model", type=str, default="pretrained", help="Model to use: 'pretrained' for default ESM-2 model, or specify a fine-tuned model in .bin format.")
     return parser.parse_args()
 
 def load_sequences(fasta_file):
@@ -70,18 +70,21 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # Load model and tokenizer
-    print("Loading pre-trained ESM-2 model...")
     # For the 650M parameter model: esm.pretrained.esm2_t33_650M_UR50D()
     #     with an embedding dimenion of 1280
     # For the 3B parameter model: esm2_t36_3B_UR50D
     #     with an embedding dimenion of 2560
     # For the 15B parameter model: esm2_t48_15B_UR50D
     #     with an embedding dimenion of 6144
-    model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
-    if args.model:
-        print(f"Updating with fine-tuned model from {args.model}...")
-        model.load_state_dict(torch.load(f"{args.model}", map_location=device))
+
+    # Load model and tokenizer    
+    if args.model == "pretrained":
+        print("Loading pre-trained ESM-2 model...")
+        model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
+    else:
+        print(f"Loading fine-tuned model from {args.model}...")
+        model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
+        model.load_state_dict(torch.load(args.model, map_location=device))
 
     batch_converter = alphabet.get_batch_converter()
     model = model.to(device)  # Move model to device

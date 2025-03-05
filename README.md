@@ -23,23 +23,24 @@ Install ESM, Hugging Face and various dependencies with pip:
 pip install -r requirements.txt
 ```
 
-# ESM workflow
+# ESM fine tune workflow
 
-Run the entire workflow with `snakemake --cores 1 -p --snakefile ESM.smk`
+Using parameters in `config.yaml` under `ESM_fine_tune`.
 
-## Provision data
+Run `snakemake --cores 1 -p --snakefile ESM_fine_tune.smk`
 
-Run `snakemake --cores 1 -p --snakefile ESM.smk data/alignment.fasta data/metadata.tsv`
+This outputs `models/esm.bin`. This requires decent GPU resources, where `--batch-size 8` of has been tuned for a single NVIDIA 96Gb H100 GPU.
 
-## Fine tune model
+# ESM embeddings workflow
 
-Run `snakemake --cores 1 -p --snakefile ESM.smk models/pytorch_model.bin`
+Using parameters in `config.yaml` under `ESM_embeddings`.
 
-This requires decent GPU resources. Batch size has been tuned for a single NVIDIA L40S 46Gb node.
+Run `snakemake --cores 1 -p --snakefile ESM_embeddings.smk`
 
-## Compute embeddings and ordination
-
-Run `snakemake --cores 1 -p --snakefile ESM.smk results/embeddings.tsv results/ordination.tsv`
+This outputs
+ - `results/log_likelihoods.tsv`
+ - `results/embeddings.tsv`
+ - `results/ordination.tsv`  
 
 # Latent diffusion workflow
 

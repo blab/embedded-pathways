@@ -23,9 +23,9 @@ class ProteinDataset(Dataset):
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Fine-tune ESM-2 on protein sequences.")
     parser.add_argument("--input", type=str, default="alignment.fasta", help="Input FASTA file containing training sequences.")
-    parser.add_argument("--output-dir", type=str, default="models", help="Directory to save the fine-tuned model.")
-    parser.add_argument("--epochs", type=int, default=3, help="Number of epochs for fine-tuning.")
-    parser.add_argument("--batch-size", type=int, default=3, help="Batch size for training, tune this to the amount of GPU memory available")
+    parser.add_argument("--output", type=str, default="models/esm.bin", help="File path to save the fine-tuned model.")
+    parser.add_argument("--epochs", type=int, default=1, help="Number of epochs for fine-tuning.")
+    parser.add_argument("--batch-size", type=int, default=8, help="Batch size for training, tune this to the amount of GPU memory available")
     parser.add_argument("--learning-rate", type=float, default=5e-5, help="Learning rate for optimizer.")
     return parser.parse_args()
 
@@ -93,12 +93,11 @@ def train_model(model, dataloader, batch_converter, optimizer, device, epochs, m
         print(f"Epoch {epoch + 1} completed. Average Loss: {total_loss / len(dataloader):.4f}")
 
 
-def save_model(model, output_dir):
-    """Save the fine-tuned model locally."""
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    torch.save(model.state_dict(), os.path.join(output_dir, "pytorch_model.bin"))
-    print(f"Model saved to {output_dir}")
+def save_model(model, output_file):
+    """Save the fine-tuned model to a file."""
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    torch.save(model.state_dict(), output_file)
+    print(f"Model saved to {output_file}")
 
 
 def main():
@@ -134,8 +133,8 @@ def main():
     train_model(model, dataloader, batch_converter, optimizer, device, args.epochs, mask_token_idx, vocab_size)
 
     # Save fine-tuned model
-    print(f"Saving fine-tuned model to {args.output_dir}...")
-    save_model(model, args.output_dir)
+    print(f"Saving fine-tuned model to {args.output}...")
+    save_model(model, args.output)
 
 
 if __name__ == "__main__":

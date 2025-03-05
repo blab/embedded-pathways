@@ -61,6 +61,7 @@ if __name__ == '__main__':
     parser.add_argument("--root", required=True,
                         help="URL or local path for the root-sequence.json file")
     parser.add_argument("--output", type=str, default="alignment.fasta", help="Output FASTA file for sequences")
+    parser.add_argument("--tips-only", action="store_true", help="If set, only include tip sequences (leaf nodes)")
 
     args = parser.parse_args()
 
@@ -77,9 +78,11 @@ if __name__ == '__main__':
     # Initialize list to store sequence records for each node
     sequence_records = []
 
-    # Find sequence at each node in the tree (includes internal nodes and terminal nodes)
-    nodes = list(tree.find_clades())
+    # Iterate over tip nodes only if --tips-only is set, otherwise iterate over all nodes
+    nodes = list(tree.get_terminals() if args.tips_only else tree.find_clades())
+
     for node in tqdm(nodes, desc="Processing nodes", unit="node"):
+
         # Get path back to the root
         path = tree.get_path(node)
 
