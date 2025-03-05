@@ -1,11 +1,9 @@
 ESM:
-  tree: https://data.nextstrain.org/nextclade_sars-cov-2.json
-  root: https://data.nextstrain.org/nextclade_sars-cov-2_root-sequence.json
+  dataset: https://nextstrain.org/nextclade/sars-cov-2
   gene: S
   fine_tune: false
 
 latent_diffusion:
-  tree: https://data.nextstrain.org/ncov_gisaid_reference.json
-  root: https://data.nextstrain.org/ncov_gisaid_reference_root-sequence.json
+  dataset: https://nextstrain.org/ncov/gisaid/reference
   gene: nuc
   count: 50

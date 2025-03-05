@@ -1,10 +1,12 @@
 # code from Trevor Bedford and Katie Kistler
 # MIT license
-import os, sys
+import argparse
 import json
+import os
 import requests
 import Bio.Phylo
-import argparse
+from tqdm import tqdm
+from urllib.parse import urlparse
 
 def json_to_tree(json_dict, root=True):
     """Returns a Bio.Phylo tree corresponding to the given JSON dictionary exported
@@ -48,54 +50,42 @@ def json_to_tree(json_dict, root=True):
     return node
 
 def annotate_parents_for_tree(tree):
-    """Annotate each node in the given tree with its parent.
-    """
+    """Annotate each node in the given tree with its parent."""
     tree.root.parent = None
     for node in tree.find_clades(order="level"):
         for child in node.clades:
             child.parent = node
-
-    # Return the tree.
     return tree
 
-if __name__=="__main__":
+def load_json(source):
+    """Load JSON data from a URL or local file."""
+    parsed = urlparse(source)
+    if parsed.scheme in ('http', 'https'):
+        return requests.get(source, headers={"accept": "application/json"}).json()
+    else:
+        with open(source, 'r') as f:
+            return json.load(f)
 
-    parser = argparse.ArgumentParser(description = "Download and simplify Auspice JSON as metadata TSV")
-    parser.add_argument("--local-files", default="False",
-        help="Toggle this on if you are supplying local JSON files for the tree and root sequence." +
-             "Default is to fetch them from a URL")
-    parser.add_argument("--tree", default="https://data.nextstrain.org/ncov_gisaid_global_all-time.json",
-        help="URL for the tree.json file, or path to the local JSON file if --local-files=True")
-    parser.add_argument('--output', type=str, default="metadata.tsv", help="output TSV file")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Download and simplify Auspice JSON as metadata TSV")
+    parser.add_argument("--tree", required=True, help="URL or local path for the tree.json file")
+    parser.add_argument("--output", type=str, default="metadata.tsv", help="Output TSV file")
 
     args = parser.parse_args()
 
-    # if we are fetching the JSONs from a URL
-    if args.local_files == "False":
-        # fetch the tree JSON from URL
-        tree_json = requests.get(args.tree, headers={"accept":"application/json"}).json()
-        # put tree in Bio.phylo format
-        tree = json_to_tree(tree_json)
-
-    # if we are using paths to local JSONs
-    elif args.local_files == "True":
-        # load tree
-        with open(args.tree, 'r') as f:
-            tree_json = json.load(f)
-        # put tree in Bio.phylo format
-        tree = json_to_tree(tree_json)
+    # Load tree JSON from either URL or local file
+    tree_json = load_json(args.tree)
+    tree = json_to_tree(tree_json)
 
     data = []
     include_clade = False
     include_mutations = False
 
-    for n in tree.find_clades(order="postorder"):
-        node_elements = {}
-        node_elements["name"] = n.name.removeprefix('hCoV-19/')
-        if n.parent:
-            node_elements["parent"] = n.parent.name.removeprefix('hCoV-19/')
-        else:
-            node_elements["parent"] = None
+    nodes = list(tree.find_clades(order="postorder"))
+    for n in tqdm(nodes, desc="Processing nodes", unit="node"):
+        node_elements = {"name": n.name.removeprefix('hCoV-19/')}
+        node_elements["parent"] = n.parent.name.removeprefix('hCoV-19/') if n.parent else None
+
         if hasattr(n, 'node_attrs'):
             if 'clade_membership' in n.node_attrs and 'value' in n.node_attrs["clade_membership"]:
                 node_elements["clade_membership"] = n.node_attrs["clade_membership"]["value"]
@@ -103,6 +93,7 @@ if __name__=="__main__":
             if 'S1_mutations' in n.node_attrs and 'value' in n.node_attrs["S1_mutations"]:
                 node_elements["S1_mutations"] = n.node_attrs["S1_mutations"]["value"]
                 include_mutations = True
+
         data.append(node_elements)
 
     # Determine column headers dynamically

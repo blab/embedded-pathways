@@ -5,31 +5,43 @@ rule all:
         generated = "results/generated.fasta",
         ordination = "results/ordination.tsv"
 
+rule download_auspice_json:
+    output:
+        tree = "data/auspice.json",
+        root = "data/auspice_root-sequence.json"
+    params:
+        dataset = config["latent_diffusion"]["dataset"]
+    shell:
+        """
+        nextstrain remote download {params.dataset:q} {output.tree:q}
+        """
+
 rule provision_alignment:
+    input:
+        tree = "data/auspice.json",
+        root = "data/auspice_root-sequence.json"
     output:
         alignment = "data/alignment.fasta"
     params:
-        tree = config["latent_diffusion"]["tree"],
-        root = config["latent_diffusion"]["root"],
         gene = config["latent_diffusion"]["gene"]
     shell:
         """
         python scripts/alignment.py \
-            --tree {params.tree:q} \
-            --root {params.root:q} \
+            --tree {input.tree:q} \
+            --root {input.root:q} \
             --output {output.alignment:q} \
             --gene {params.gene:q}
         """
 
 rule provision_metadata:
+    input:
+        tree = "data/auspice.json"
     output:
         metadata = "data/metadata.tsv"
-    params:
-        tree = config["latent_diffusion"]["tree"]
     shell:
         """
         python scripts/metadata.py \
-            --tree {params.tree:q} \
+            --tree {input.tree:q} \
             --output {output.metadata:q}
         """
 

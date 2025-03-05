@@ -16,7 +16,8 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Seq import MutableSeq
 from Bio.SeqRecord import SeqRecord
-
+from tqdm import tqdm
+from urllib.parse import urlparse
 
 def apply_muts_to_root(root_seq, list_of_muts):
     """
@@ -25,21 +26,28 @@ def apply_muts_to_root(root_seq, list_of_muts):
     is ordered from root to node, so multiple mutations at the
     same site will correctly overwrite each other
     """
-
-    # make the root sequence mutatable
+    # make the root sequence mutable
     root_plus_muts = MutableSeq(root_seq)
 
     # apply all mutations to root sequence
     for mut in list_of_muts:
         # subtract 1 to deal with biological numbering vs python
         mut_site = int(mut[1:-1])-1
-        # get the nuc that the site was mutated TO
+        # get the nucleotide that the site was mutated to
         mutation = mut[-1]
         # apply mutation
         root_plus_muts[mut_site] = mutation
 
-
     return root_plus_muts
+
+def load_json(source):
+    """Load JSON data from a URL or local file."""
+    parsed = urlparse(source)
+    if parsed.scheme in ('http', 'https'):
+        return requests.get(source, headers={"accept": "application/json"}).json()
+    else:
+        with open(source, 'r') as f:
+            return json.load(f)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -47,65 +55,47 @@ if __name__ == '__main__':
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("--gene", default="nuc",
-        help="Name of gene to return AA sequences for. 'nuc' will return full geneome nucleotide seq")
-    parser.add_argument("--local-files", default="False",
-        help="Toggle this on if you are supplying local JSON files for the tree and root sequence." +
-             "Default is to fetch them from a URL")
-    parser.add_argument("--tree", default="https://data.nextstrain.org/ncov_gisaid_global_all-time.json",
-        help="URL for the tree.json file, or path to the local JSON file if --local-files=True")
-    parser.add_argument("--root", default="https://data.nextstrain.org/ncov_gisaid_global_all-time_root-sequence.json",
-        help="URL for the root-sequence.json file, or path to the local JSON file if --local-files=True")
+                        help="Name of gene to return AA sequences for. 'nuc' will return full genome nucleotide seq")
+    parser.add_argument("--tree", required=True,
+                        help="URL or local path for the tree.json file")
+    parser.add_argument("--root", required=True,
+                        help="URL or local path for the root-sequence.json file")
     parser.add_argument("--output", type=str, default="alignment.fasta", help="Output FASTA file for sequences")
 
     args = parser.parse_args()
 
-    # if we are fetching the JSONs from a URL
-    if args.local_files == "False":
-        # fetch the tree JSON from URL
-        tree_json = requests.get(args.tree, headers={"accept":"application/json"}).json()
-        # put tree in Bio.phylo format
-        tree = json_to_tree(tree_json)
-        # fetch the root JSON from URL
-        root_json = requests.get(args.root, headers={"accept":"application/json"}).json()
-        # get the nucleotide sequence of root
-        root_seq = root_json[args.gene]
+    # Load tree and root JSON from either URLs or local files
+    tree_json = load_json(args.tree)
+    root_json = load_json(args.root)
 
-    # if we are using paths to local JSONs
-    elif args.local_files == "True":
-        # load tree
-        with open(args.tree, 'r') as f:
-            tree_json = json.load(f)
-        # put tree in Bio.phylo format
-        tree = json_to_tree(tree_json)
-        # load root sequence file
-        with open(args.root, 'r') as f:
-            root_json = json.load(f)
-        # get the nucleotide sequence of root
-        root_seq = root_json[args.gene]
+    # Convert tree JSON to Bio.phylo format
+    tree = json_to_tree(tree_json)
 
-    ## Now find the node sequences
+    # Get the nucleotide sequence of the root
+    root_seq = root_json[args.gene]
 
-    # initialize list to store sequence records for each node
+    # Initialize list to store sequence records for each node
     sequence_records = []
 
-    # find sequence at each node in the tree (includes internal nodes and terminal nodes)
-    for node in tree.find_clades():
-
-        # get path back to the root
+    # Find sequence at each node in the tree (includes internal nodes and terminal nodes)
+    nodes = list(tree.find_clades())
+    for node in tqdm(nodes, desc="Processing nodes", unit="node"):
+        # Get path back to the root
         path = tree.get_path(node)
 
-        # get all mutations relative to root
+        # Get all mutations relative to root
         muts = [branch.branch_attrs['mutations'].get(args.gene, []) for branch in path]
-        # flatten the list of mutations
+        # Flatten the list of mutations
         muts = [item for sublist in muts for item in sublist]
-        # get sequence at node
+        # Get sequence at node
         node_seq = apply_muts_to_root(root_seq, muts)
-        # strip trailing stop codons
+        # Strip trailing stop codons
         stripped_seq = Seq(str(node_seq).rstrip('*'))
-        # strip hCoV-19/ from beginning of strain name
+        # Strip hCoV-19/ from beginning of strain name
         strain = node.name.removeprefix('hCoV-19/')
-        # only keep records without stop codons (*)
-        if not '*' in stripped_seq:
+        # Only keep records without stop codons (*)
+        if '*' not in stripped_seq:
             sequence_records.append(SeqRecord(stripped_seq, strain, '', ''))
 
+    # Write sequences to output FASTA file
     SeqIO.write(sequence_records, args.output, "fasta")
