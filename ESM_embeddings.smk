@@ -2,12 +2,12 @@ configfile: "defaults/config.yaml"
 
 rule all:
     input:
-        ordination = "results/ordination.tsv"
+        ordination = config["ESM_embeddings"]["ordination"]
 
 rule download_auspice_json:
     output:
-        tree = "data/auspice.json",
-        root = "data/auspice_root-sequence.json"
+        tree = "data/auspice_embeddings.json",
+        root = "data/auspice_embeddings_root-sequence.json"
     params:
         dataset = config["ESM_embeddings"]["dataset"]
     shell:
@@ -17,10 +17,10 @@ rule download_auspice_json:
 
 rule provision_alignment:
     input:
-        tree = "data/auspice.json",
-        root = "data/auspice_root-sequence.json"
+        tree = "data/auspice_embeddings.json",
+        root = "data/auspice_embeddings_root-sequence.json"
     output:
-        alignment = "data/alignment.fasta"
+        alignment = "data/alignment_embeddings.fasta"
     params:
         gene = config["ESM_embeddings"]["gene"]
     shell:
@@ -34,9 +34,9 @@ rule provision_alignment:
 
 rule provision_metadata:
     input:
-        tree = "data/auspice.json"
+        tree = "data/auspice_embeddings.json"
     output:
-        metadata = "data/metadata.tsv"
+        metadata = "data/metadata_embeddings.tsv"
     shell:
         """
         python scripts/metadata.py \
@@ -46,7 +46,7 @@ rule provision_metadata:
 
 rule compute_embeddings:
     input:
-        alignment = "data/alignment.fasta",
+        alignment = "data/alignment_embeddings.fasta",
     output:
         log_likelihoods = config["ESM_embeddings"]["log_likelihoods"],
         embeddings = config["ESM_embeddings"]["embeddings"]

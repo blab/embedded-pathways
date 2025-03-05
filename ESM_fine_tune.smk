@@ -6,8 +6,8 @@ rule all:
 
 rule download_auspice_json:
     output:
-        tree = "data/auspice.json",
-        root = "data/auspice_root-sequence.json"
+        tree = "data/auspice_fine_tune.json",
+        root = "data/auspice_fine_tune_root-sequence.json"
     params:
         dataset = config["ESM_fine_tune"]["dataset"]
     shell:
@@ -17,10 +17,10 @@ rule download_auspice_json:
 
 rule provision_alignment:
     input:
-        tree = "data/auspice.json",
-        root = "data/auspice_root-sequence.json"
+        tree = "data/auspice_fine_tune.json",
+        root = "data/auspice_fine_tune_root-sequence.json"
     output:
-        alignment = "data/alignment.fasta"
+        alignment = "data/alignment_fine_tune.fasta"
     params:
         gene = config["ESM_fine_tune"]["gene"]
     shell:
@@ -35,7 +35,7 @@ rule provision_alignment:
 
 rule fine_tune:
     input:
-        alignment = "data/alignment.fasta"
+        alignment = "data/alignment_fine_tune.fasta"
     output:
         model = config["ESM_fine_tune"]["model"]
     shell:
