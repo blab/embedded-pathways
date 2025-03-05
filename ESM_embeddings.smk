@@ -51,14 +51,16 @@ rule compute_embeddings:
         log_likelihoods = config["ESM_embeddings"]["log_likelihoods"],
         embeddings = config["ESM_embeddings"]["embeddings"]
     params:
-        model = config["ESM_embeddings"]["model"]
+        model = config["ESM_embeddings"]["model"],
+        model_weights = config["ESM_embeddings"]["model_weights"]
     shell:
         """
         python ESM/embeddings.py \
             --input {input.alignment:q} \
             --output-log-likelihoods {output.log_likelihoods:q} \
             --output-embeddings {output.embeddings:q} \
-            --model {params.model:q}
+            --model {params.model:q} \
+            --model-weights {params.model_weights:q}
         """
 
 rule compute_ordination:

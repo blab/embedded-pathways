@@ -6,7 +6,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Run UMAP, t-SNE, and PCA on CLS vectors to produce 2D ordinations.")
+    parser = argparse.ArgumentParser(description="Run t-SNE and PCA on CLS vectors to produce 2D ordinations.")
     parser.add_argument("--input", type=str, default="embeddings.tsv", help="Input TSV file containing CLS vectors (default: embeddings.tsv).")
     parser.add_argument("--output", type=str, default="ordination.tsv", help="Output TSV file to save 2D coordinates (default: ordination_results.tsv).")
     return parser.parse_args()

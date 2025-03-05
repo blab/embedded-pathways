@@ -37,10 +37,17 @@ rule fine_tune:
     input:
         alignment = "data/alignment_fine_tune.fasta"
     output:
+        model_weights = config["ESM_fine_tune"]["model"]
+    params:
+        epochs = config["ESM_fine_tune"]["epochs"],
+        batch_size = config["ESM_fine_tune"]["batch_size"],
         model = config["ESM_fine_tune"]["model"]
     shell:
         """
         python ESM/fine-tune.py \
             --input {input.alignment:q} \
-            --output {output.model:q}
+            --output {output.model_weights:q} \
+            --epochs {params.epochs:q} \
+            --batch-size {params.batch_size:q} \
+            --model {params.model:q}
         """

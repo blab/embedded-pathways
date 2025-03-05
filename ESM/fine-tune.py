@@ -4,7 +4,6 @@ import esm
 import argparse
 from Bio import SeqIO
 from torch.utils.data import DataLoader, Dataset
-from transformers import AdamW
 import os
 
 
@@ -25,8 +24,10 @@ def parse_arguments():
     parser.add_argument("--input", type=str, default="alignment.fasta", help="Input FASTA file containing training sequences.")
     parser.add_argument("--output", type=str, default="models/esm.bin", help="File path to save the fine-tuned model.")
     parser.add_argument("--epochs", type=int, default=1, help="Number of epochs for fine-tuning.")
-    parser.add_argument("--batch-size", type=int, default=8, help="Batch size for training, tune this to the amount of GPU memory available")
+    parser.add_argument("--batch-size", type=int, default=8, help="Batch size for training.")
     parser.add_argument("--learning-rate", type=float, default=5e-5, help="Learning rate for optimizer.")
+    parser.add_argument("--model", type=str, choices=["esm2_t33_650M_UR50D", "esm2_t36_3B_UR50D", "esm2_t48_15B_UR50D"],
+                        default="esm2_t33_650M_UR50D", help="Specify which ESM-2 model to use.")
     return parser.parse_args()
 
 
@@ -58,7 +59,7 @@ def mask_tokens(tokens, mask_token_idx, vocab_size, device):
     return tokens, labels
 
 
-def train_model(model, dataloader, batch_converter, optimizer, device, epochs, mask_token_idx, vocab_size):
+def train_model(model, dataloader, batch_converter, optimizer, device, epochs, mask_token_idx, vocab_size, repr_layer):
     """Train the model on the given dataset."""
     model.train()
     for epoch in range(epochs):
@@ -76,7 +77,7 @@ def train_model(model, dataloader, batch_converter, optimizer, device, epochs, m
             masked_tokens, labels = mask_tokens(batch_tokens, mask_token_idx, vocab_size, device)
 
             optimizer.zero_grad()
-            results = model(masked_tokens, repr_layers=[33])
+            results = model(masked_tokens, repr_layers=[repr_layer])
             logits = results["logits"]
 
             # Compute loss
@@ -107,9 +108,22 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
+    # 650M parameter model: esm2_t33_650M_UR50D with embedding dimen of 1280
+    # 3B parameter model: esm2_t36_3B_UR50D with embedding dimen of 2560
+    # 15B parameter model: esm2_t48_15B_UR50D with embedding dimen of 6144
+
+    # Map model names to their corresponding layer numbers
+    model_layer_map = {
+        "esm2_t33_650M_UR50D": 33,
+        "esm2_t36_3B_UR50D": 36,
+        "esm2_t48_15B_UR50D": 48
+    }
+
+    repr_layer = model_layer_map[args.model]
+
     # Load model and tokenizer
-    print("Loading ESM-2 model...")
-    model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
+    print(f"Loading {args.model} model...")
+    model, alphabet = getattr(esm.pretrained, args.model)()
     batch_converter = alphabet.get_batch_converter()
     mask_token_idx = alphabet.mask_idx  # Index of the [MASK] token
     vocab_size = len(alphabet)  # Vocabulary size
@@ -130,7 +144,7 @@ def main():
 
     # Train model
     print("Starting fine-tuning...")
-    train_model(model, dataloader, batch_converter, optimizer, device, args.epochs, mask_token_idx, vocab_size)
+    train_model(model, dataloader, batch_converter, optimizer, device, args.epochs, mask_token_idx, vocab_size, repr_layer)
 
     # Save fine-tuned model
     print(f"Saving fine-tuned model to {args.output}...")
