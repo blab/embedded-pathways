@@ -4,6 +4,7 @@ import esm
 import argparse
 from Bio import SeqIO
 import pandas as pd
+from tqdm import tqdm
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Extract CLS token embeddings and log likelihood from AA sequences in FASTA format using ESM-2.")
@@ -25,12 +26,9 @@ def load_sequences(fasta_file):
 def extract_cls_embeddings_and_log_likelihood(sequences, model, batch_converter, device, repr_layer):
     """Extract CLS embeddings and log likelihood for a list of sequences."""
     all_results = []
-    for i, (seq_id, sequence) in enumerate(sequences):
-        print(f"Processing sequence {i+1}/{len(sequences)}: {seq_id}")
+    for seq_id, sequence in tqdm(sequences, desc="Processing sequences", unit="seq"):
         data = [(seq_id, sequence)]
         batch_labels, batch_strs, batch_tokens = batch_converter(data)
-
-        # Move batch tokens to the specified device
         batch_tokens = batch_tokens.to(device)
 
         with torch.no_grad():

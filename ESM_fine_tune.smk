@@ -2,7 +2,7 @@ configfile: "defaults/config.yaml"
 
 rule all:
     input:
-        model = config["ESM_fine_tune"]["model"]
+        model = config["ESM_fine_tune"]["model_weights"]
 
 rule download_auspice_json:
     output:
@@ -37,7 +37,7 @@ rule fine_tune:
     input:
         alignment = "data/alignment_fine_tune.fasta"
     output:
-        model_weights = config["ESM_fine_tune"]["model"]
+        model_weights = config["ESM_fine_tune"]["model_weights"]
     params:
         epochs = config["ESM_fine_tune"]["epochs"],
         batch_size = config["ESM_fine_tune"]["batch_size"],
