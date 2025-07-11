@@ -26,7 +26,7 @@ rule provision_alignment:
         gene = config["latent_diffusion"]["gene"]
     shell:
         """
-        python scripts/alignment.py \
+        python3 scripts/alignment.py \
             --tree {input.tree:q} \
             --root {input.root:q} \
             --output {output.alignment:q} \
@@ -40,7 +40,7 @@ rule provision_metadata:
         metadata = "data/metadata.tsv"
     shell:
         """
-        python scripts/metadata.py \
+        python3 scripts/metadata.py \
             --tree {input.tree:q} \
             --output {output.metadata:q}
         """
@@ -52,7 +52,7 @@ rule trim:
         alignment = "data/trimmed.fasta"
     shell:
         """
-        python scripts/trim.py \
+        python3 scripts/trim.py \
             --input-alignment {input.alignment:q} \
             --output-alignment {output.alignment:q}
         """
@@ -64,7 +64,7 @@ rule train_vae:
         vae_model = "models/vae.pth"
     shell:
         """
-        python latent-diffusion/train_vae.py \
+        python3 latent-diffusion/train_vae.py \
             --input-alignment {input.alignment:q} \
             --output-vae-model {output.vae_model:q}
         """
@@ -108,7 +108,7 @@ rule embed:
         embeddings = "results/embeddings.tsv"
     shell:
         """
-        python latent-diffusion/embed.py \
+        python3 latent-diffusion/embed.py \
             --input-alignment {input.alignment:q} \
             --input-vae-model {input.vae_model:q} \
             --output-embeddings {output.embeddings:q} \
@@ -121,7 +121,7 @@ rule compute_ordination:
         ordination = "results/ordination.tsv"
     shell:
         """
-        python scripts/ordination.py \
+        python3 scripts/ordination.py \
             --input {input.embeddings:q} \
             --output {output.ordination:q}
         """
