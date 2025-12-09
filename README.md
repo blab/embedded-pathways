@@ -71,13 +71,13 @@ ssh tbedford@maestro.fhcrc.org
 
 Set up for ESM
 ```
-module load snakemake PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
+module load snakemake/8.4.2-foss-2023a PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
 pip install --user fair-esm nextstrain-augur transformers
 ```
 
 Set up for latent diffusion
 ```
-module load snakemake PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
+module load snakemake/8.4.2-foss-2023a PyTorch/2.1.2-foss-2023a-CUDA-12.1.1
 pip install --user nextstrain-augur diffusers["torch"] transformers
 ```
 
