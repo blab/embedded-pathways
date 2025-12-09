@@ -14,10 +14,10 @@ ESM_fine_tune:
 
 # For estimating Pango lineage embeddings with ESM
 ESM_embeddings:
-  dataset: https://nextstrain.org/nextclade/sars-cov-2
+  dataset: https://nextstrain.org/ncov/gisaid/global/all-time@2025-10-01
   gene: S
   model: esm2_t36_3B_UR50D
-  model_weights: models/esm_3B.bin # file location for fine tuned model, or "pretrained"
+  model_weights: pretrained # file location for fine tuned model, or "pretrained"
   log_likelihoods: results/log_likelihoods.tsv
   embeddings: results/embeddings.tsv
   ordination: results/ordination.tsv
