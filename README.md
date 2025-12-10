@@ -105,6 +105,13 @@ Grab remote results
 scp -r tbedford@maestro.fhcrc.org:~/embedded-pathways/results/* results/
 ```
 
+Via jump host
+```
+scp -o ProxyJump=tbedford@snail.fhcrc.org \
+    -r tbedford@conatus.fhcrc.org:~/embedded-pathways/results/ \
+    ./results/
+```
+
 # Models
 
 ## Variational autoencoder
